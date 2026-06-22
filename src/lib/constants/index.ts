@@ -1,6 +1,9 @@
 export const APP_ROUTES = {
   home: "/",
   login: "/login",
+  forgotPassword: "/forgot-password",
+  resetPassword: "/reset-password",
+  acceptInvitation: "/accept-invitation",
   dashboard: "/dashboard",
   calls: "/calls",
   usage: "/usage",
@@ -52,9 +55,21 @@ export const USER_ROLES = {
   client: "client",
 } as const;
 
-export const PUBLIC_ROUTES = ["/", "/login", "/auth/callback"] as const;
+export const USER_ROLE_LABELS: Record<(typeof USER_ROLES)[keyof typeof USER_ROLES], string> = {
+  admin: "System Admin",
+  client: "Client User",
+};
 
-export const AUTH_ONLY_ROUTES = ["/login"] as const;
+export const PUBLIC_ROUTES = [
+  "/",
+  "/login",
+  "/forgot-password",
+  "/reset-password",
+  "/accept-invitation",
+  "/auth/callback",
+] as const;
+
+export const AUTH_ONLY_ROUTES = ["/login", "/forgot-password"] as const;
 
 export const PROTECTED_ROUTE_PREFIXES = [
   "/dashboard",

@@ -13,6 +13,9 @@ describe("auth route helpers", () => {
   it("identifies public routes", () => {
     expect(isPublicRoute("/")).toBe(true);
     expect(isPublicRoute("/login")).toBe(true);
+    expect(isPublicRoute("/forgot-password")).toBe(true);
+    expect(isPublicRoute("/reset-password")).toBe(true);
+    expect(isPublicRoute("/accept-invitation")).toBe(true);
     expect(isPublicRoute("/auth/callback")).toBe(true);
     expect(isPublicRoute("/api/health")).toBe(true);
     expect(isPublicRoute("/dashboard")).toBe(false);
@@ -33,6 +36,8 @@ describe("auth route helpers", () => {
 
   it("identifies auth-only and api routes", () => {
     expect(isAuthOnlyRoute("/login")).toBe(true);
+    expect(isAuthOnlyRoute("/forgot-password")).toBe(true);
+    expect(isAuthOnlyRoute("/reset-password")).toBe(false);
     expect(isAuthOnlyRoute("/dashboard")).toBe(false);
     expect(isApiRoute("/api/calls")).toBe(true);
     expect(isApiRoute("/calls")).toBe(false);

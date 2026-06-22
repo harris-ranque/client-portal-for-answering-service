@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
-import { requireAuth, getSessionUserWithCompany } from "@/features/auth";
+import { requireClient, getSessionUserWithCompany } from "@/features/auth";
 import { BillingView } from "@/features/billing/components/billing-view";
 import { getBillingData } from "@/features/billing/lib/billing.repository";
 import { billingQuerySchema } from "@/features/billing/schemas/billing-query.schema";
 import { LoadingSkeleton, ErrorState } from "@/components/feedback";
 import { PageContainer, PageHeader } from "@/components/layout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APP_ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -30,7 +27,7 @@ function BillingContentFallback() {
 }
 
 async function BillingContent({ searchParams }: BillingPageProps) {
-  const user = await requireAuth();
+  const user = await requireClient();
   const sessionData = await getSessionUserWithCompany();
   const companyId = sessionData?.session?.companyId ?? user.companyId;
   const params = await searchParams;
@@ -52,15 +49,12 @@ async function BillingContent({ searchParams }: BillingPageProps) {
               {!isSupabaseConfigured() ? "Supabase not configured" : "No company assigned"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <p className="text-sm text-muted-foreground">
               {!isSupabaseConfigured()
                 ? "Configure Supabase credentials to load billing information."
-                : "Your account is not linked to a company yet."}
+                : "Your account is not linked to a company yet. Contact your answering service provider."}
             </p>
-            {user.role === "admin" ? (
-              <Button render={<Link href={APP_ROUTES.admin.root} />}>Open admin panel</Button>
-            ) : null}
           </CardContent>
         </Card>
       </PageContainer>

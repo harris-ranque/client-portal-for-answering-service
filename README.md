@@ -249,7 +249,8 @@ npm run supabase:types    # Regenerate src/types/database.ts
 Authenticated routes use a shared portal shell with:
 
 - Collapsible sidebar (desktop) and slide-out sheet (mobile)
-- Role-aware navigation — clients see portal sections; admins also see administration tools
+- Role-aware navigation — client users see the client portal; system admins see the System Admin dashboard only (`/admin/*`)
+- Auth pages: login, forgot password, reset password, accept invitation (no public signup)
 - Header with page title, theme toggle, and user menu
 - Dark mode via `next-themes`
 
@@ -308,7 +309,7 @@ Profile updates use server actions with RLS-scoped Supabase writes.
 
 ## Admin Panel
 
-The admin area (`/admin`) is restricted to users with the `admin` role.
+The System Admin dashboard (`/admin`) is restricted to users with the `admin` role. Client users cannot access admin routes or client portal routes for other companies.
 
 | Route | Purpose |
 | ----- | ------- |

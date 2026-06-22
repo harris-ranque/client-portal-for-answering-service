@@ -25,6 +25,9 @@ export const clientFormSchema = z.object({
   email: optionalEmail(),
   phone: optionalString(40),
   address: optionalString(500),
+  stripeCustomerId: optionalString(120),
+  hubspotCompanyId: optionalString(120),
+  justcallAccountId: optionalString(120),
 });
 
 export const clientIdSchema = z.object({

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Building2, Phone, Timer, Users } from "lucide-react";
+import { Building2, DollarSign, Phone, RefreshCw, Timer, Users } from "lucide-react";
 
 import type { AdminOverviewMetrics } from "@/features/admin/types/admin.types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,17 +9,25 @@ interface AdminOverviewProps {
   metrics: AdminOverviewMetrics;
 }
 
+function formatRevenue(cents: number) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    maximumFractionDigits: 0,
+  }).format(cents / 100);
+}
+
 export function AdminOverview({ metrics }: AdminOverviewProps) {
   const cards = [
     {
-      title: "Companies",
+      title: "Active clients",
       value: metrics.activeCompanies.toLocaleString(),
       description: `${metrics.totalCompanies} total · ${metrics.onboardingInProgress} onboarding`,
       icon: Building2,
       href: APP_ROUTES.admin.clients,
     },
     {
-      title: "Users",
+      title: "Client users",
       value: metrics.totalUsers.toLocaleString(),
       description: "Portal accounts",
       icon: Users,
@@ -41,10 +49,27 @@ export function AdminOverview({ metrics }: AdminOverviewProps) {
       icon: Timer,
       href: APP_ROUTES.admin.metrics,
     },
+    {
+      title: "Monthly revenue",
+      value: formatRevenue(metrics.monthlyRevenueCents),
+      description: "Paid invoices this month",
+      icon: DollarSign,
+      href: APP_ROUTES.admin.billing,
+    },
+    {
+      title: "Sync status",
+      value: metrics.failedSyncJobs.toLocaleString(),
+      description:
+        metrics.runningSyncJobs > 0
+          ? `${metrics.runningSyncJobs} running · failed jobs`
+          : "Failed integration sync jobs",
+      icon: RefreshCw,
+      href: APP_ROUTES.admin.integrations,
+    },
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => {
         const Icon = card.icon;
 

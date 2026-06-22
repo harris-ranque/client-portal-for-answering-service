@@ -4,11 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  getNavItemsForRole,
+  getNavItemsForPath,
   isNavItemActive,
   type NavItem,
 } from "@/lib/constants/navigation";
 import { APP_ROUTES } from "@/lib/constants";
+import { isSystemAdmin } from "@/lib/constants/role-labels";
 import { clientEnv } from "@/lib/env";
 import {
   Sidebar,
@@ -69,8 +70,10 @@ function NavGroup({
 
 export function AppSidebar({ userRole, companyName }: AppSidebarProps) {
   const pathname = usePathname();
-  const isAdmin = userRole === "admin";
-  const navItems = getNavItemsForRole(userRole);
+  const isAdmin = isSystemAdmin(userRole);
+  const isAdminArea =
+    pathname === APP_ROUTES.admin.root || pathname.startsWith(`${APP_ROUTES.admin.root}/`);
+  const navItems = getNavItemsForPath(pathname, userRole);
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -100,7 +103,7 @@ export function AppSidebar({ userRole, companyName }: AppSidebarProps) {
 
       <SidebarContent>
         <NavGroup
-          label={isAdmin ? "Administration" : "Portal"}
+          label={isAdminArea ? "System Admin" : "Client Portal"}
           items={navItems}
           pathname={pathname}
         />
@@ -110,7 +113,7 @@ export function AppSidebar({ userRole, companyName }: AppSidebarProps) {
         <div className="px-2 py-1">
           <p className="truncate text-xs text-muted-foreground">
             {isAdmin
-              ? "Administrator"
+              ? "System Admin"
               : companyName
                 ? `Organization: ${companyName}`
                 : "No company assigned"}

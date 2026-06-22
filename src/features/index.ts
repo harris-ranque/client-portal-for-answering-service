@@ -1,4 +1,3 @@
-export * from "@/features/admin";
 export * from "@/features/auth";
 export * from "@/features/billing";
 export * from "@/features/calls";

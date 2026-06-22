@@ -87,6 +87,9 @@ export async function createAdminClient(input: {
   email?: string;
   phone?: string;
   address?: string;
+  stripeCustomerId?: string;
+  hubspotCompanyId?: string;
+  justcallAccountId?: string;
 }) {
   const supabase = await createClient();
 
@@ -97,6 +100,9 @@ export async function createAdminClient(input: {
       email: input.email ?? null,
       phone: input.phone ?? null,
       address: input.address ?? null,
+      stripe_customer_id: input.stripeCustomerId ?? null,
+      hubspot_company_id: input.hubspotCompanyId ?? null,
+      justcall_account_id: input.justcallAccountId ?? null,
       is_active: true,
     })
     .select(COMPANY_COLUMNS)
@@ -123,6 +129,9 @@ export async function updateAdminClient(
     email?: string;
     phone?: string;
     address?: string;
+    stripeCustomerId?: string;
+    hubspotCompanyId?: string;
+    justcallAccountId?: string;
   },
 ) {
   const supabase = await createClient();
@@ -134,6 +143,9 @@ export async function updateAdminClient(
       email: input.email ?? null,
       phone: input.phone ?? null,
       address: input.address ?? null,
+      stripe_customer_id: input.stripeCustomerId ?? null,
+      hubspot_company_id: input.hubspotCompanyId ?? null,
+      justcall_account_id: input.justcallAccountId ?? null,
     })
     .eq("id", clientId)
     .select(COMPANY_COLUMNS)

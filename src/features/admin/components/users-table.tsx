@@ -4,6 +4,7 @@ import { useActionState, useEffect } from "react";
 import { toast } from "sonner";
 
 import {
+  resendInvitationAction,
   resetUserPasswordAction,
   toggleUserActiveAction,
 } from "@/features/admin/actions/user-actions";
@@ -12,8 +13,37 @@ import type { AdminUserRecord } from "@/features/admin/types/admin.types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getUserRoleLabel } from "@/lib/constants/role-labels";
 
 const initialState: AdminActionState = {};
+
+function UserResendInvitation({ user }: { user: AdminUserRecord }) {
+  const [state, formAction, isPending] = useActionState(resendInvitationAction, initialState);
+
+  useEffect(() => {
+    if (state.success) {
+      toast.success("Invitation link generated.");
+    }
+  }, [state.success]);
+
+  return (
+    <div className="space-y-2">
+      <form action={formAction} className="flex gap-2">
+        <input type="hidden" name="email" value={user.email} />
+        <Button type="submit" variant="outline" size="sm" disabled={isPending}>
+          Resend invitation
+        </Button>
+      </form>
+      {state.resetLink ? (
+        <div className="space-y-1">
+          <p className="text-xs text-muted-foreground">Invitation link (share securely):</p>
+          <Input readOnly value={state.resetLink} className="text-xs" />
+        </div>
+      ) : null}
+      {state.error ? <p className="text-xs text-destructive">{state.error}</p> : null}
+    </div>
+  );
+}
 
 function UserResetPassword({ user }: { user: AdminUserRecord }) {
   const [state, formAction, isPending] = useActionState(resetUserPasswordAction, initialState);
@@ -80,9 +110,7 @@ export function UsersTable({ users }: UsersTableProps) {
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <p className="font-medium">{user.full_name ?? user.email}</p>
-                <Badge variant="secondary" className="capitalize">
-                  {user.role}
-                </Badge>
+                <Badge variant="secondary">{getUserRoleLabel(user.role)}</Badge>
                 <Badge variant={user.is_active ? "default" : "outline"}>
                   {user.is_active ? "Active" : "Inactive"}
                 </Badge>
@@ -96,6 +124,7 @@ export function UsersTable({ users }: UsersTableProps) {
               <UserStatusToggle user={user} />
             </div>
           </div>
+          <UserResendInvitation user={user} />
           <UserResetPassword user={user} />
         </div>
       ))}

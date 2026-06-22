@@ -8,12 +8,11 @@ import {
   Link2,
   Phone,
   Rocket,
-  Settings,
   UserCircle,
   Users,
 } from "lucide-react";
 
-import { APP_ROUTES } from "@/lib/constants";
+import { APP_ROUTES, USER_ROLES } from "@/lib/constants";
 
 export interface NavItem {
   title: string;
@@ -103,16 +102,19 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-export const ACCOUNT_NAV_ITEMS: NavItem[] = [
-  {
-    title: "Client Portal",
-    href: APP_ROUTES.dashboard,
-    icon: Settings,
-  },
-];
-
 export function getNavItemsForRole(role: "admin" | "client") {
   return role === "admin" ? ADMIN_NAV_ITEMS : CLIENT_NAV_ITEMS;
+}
+
+export function getNavItemsForPath(pathname: string, role: "admin" | "client") {
+  const isAdminArea =
+    pathname === APP_ROUTES.admin.root || pathname.startsWith(`${APP_ROUTES.admin.root}/`);
+
+  if (isAdminArea && role === USER_ROLES.admin) {
+    return ADMIN_NAV_ITEMS;
+  }
+
+  return CLIENT_NAV_ITEMS;
 }
 
 export function getHomeRouteForRole(role: "admin" | "client") {

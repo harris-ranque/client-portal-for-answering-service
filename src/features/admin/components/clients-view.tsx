@@ -64,8 +64,9 @@ export function ClientsView({ result, filters }: ClientsViewProps) {
       <PageHeader
         title="Clients"
         description="Create, edit, and manage client organizations."
-        actions={<ClientCreateForm />}
       />
+
+      <ClientCreateForm />
 
       <form
         onSubmit={handleFilterSubmit}

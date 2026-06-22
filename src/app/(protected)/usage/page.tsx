@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
-import { requireAuth, getSessionUserWithCompany } from "@/features/auth";
+import { requireClient, getSessionUserWithCompany } from "@/features/auth";
 import { UsageView } from "@/features/usage/components/usage-view";
 import { getUsageData } from "@/features/usage/lib/usage.repository";
 import { usageQuerySchema } from "@/features/usage/schemas/usage-query.schema";
 import { LoadingSkeleton } from "@/components/feedback";
 import { PageContainer, PageHeader } from "@/components/layout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APP_ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -30,7 +27,7 @@ function UsageContentFallback() {
 }
 
 async function UsageContent({ searchParams }: UsagePageProps) {
-  const user = await requireAuth();
+  const user = await requireClient();
   const sessionData = await getSessionUserWithCompany();
   const companyId = sessionData?.session?.companyId ?? user.companyId;
   const params = await searchParams;
@@ -48,15 +45,12 @@ async function UsageContent({ searchParams }: UsagePageProps) {
               {!isSupabaseConfigured() ? "Supabase not configured" : "No company assigned"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <p className="text-sm text-muted-foreground">
               {!isSupabaseConfigured()
                 ? "Configure Supabase credentials to load usage metrics."
-                : "Your account is not linked to a company yet."}
+                : "Your account is not linked to a company yet. Contact your answering service provider."}
             </p>
-            {user.role === "admin" ? (
-              <Button render={<Link href={APP_ROUTES.admin.root} />}>Open admin panel</Button>
-            ) : null}
           </CardContent>
         </Card>
       </PageContainer>

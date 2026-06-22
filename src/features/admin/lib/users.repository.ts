@@ -1,5 +1,6 @@
 import type { UsersQueryInput } from "@/features/admin/schemas/user.schema";
 import type { AdminUsersResult, AdminUserRecord } from "@/features/admin/types/admin.types";
+import { APP_ROUTES } from "@/lib/constants";
 import { getAppUrl } from "@/lib/env/app-url";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseAdminConfigured } from "@/lib/supabase/config";
@@ -90,7 +91,7 @@ export async function inviteAdminUser(input: {
     input.email,
     {
       data: { full_name: input.fullName },
-      redirectTo: `${getAppUrl()}/auth/callback`,
+      redirectTo: `${getAppUrl()}/auth/callback?next=${encodeURIComponent(APP_ROUTES.acceptInvitation)}`,
     },
   );
 
@@ -127,7 +128,6 @@ export async function inviteAdminUser(input: {
     const { error: membershipError } = await admin.from("company_members").insert({
       user_id: userId,
       company_id: input.companyId,
-      role: "client",
     });
 
     if (membershipError) {
@@ -149,7 +149,7 @@ export async function generateAdminPasswordResetLink(email: string) {
     type: "recovery",
     email,
     options: {
-      redirectTo: `${getAppUrl()}/auth/callback?next=/login`,
+      redirectTo: `${getAppUrl()}/auth/callback?next=${encodeURIComponent(APP_ROUTES.resetPassword)}`,
     },
   });
 
@@ -175,4 +175,39 @@ export async function setAdminUserActive(userId: string, isActive: boolean) {
   }
 
   return data;
+}
+
+export async function resendAdminUserInvitation(email: string) {
+  if (!isSupabaseAdminConfigured()) {
+    throw new Error("Supabase secret key is required to resend invitations.");
+  }
+
+  const admin = createAdminClient();
+
+  const { data, error } = await admin.auth.admin.generateLink({
+    type: "invite",
+    email,
+    options: {
+      redirectTo: `${getAppUrl()}/auth/callback?next=${encodeURIComponent(APP_ROUTES.acceptInvitation)}`,
+    },
+  });
+
+  if (error || !data.properties?.action_link) {
+    throw new Error(error?.message ?? "Failed to resend invitation.");
+  }
+
+  return data.properties.action_link;
+}
+
+export async function revokeAdminUserSessions(userId: string) {
+  if (!isSupabaseAdminConfigured()) {
+    throw new Error("Supabase secret key is required to revoke sessions.");
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.signOut(userId, "global");
+
+  if (error) {
+    throw new Error(error.message);
+  }
 }

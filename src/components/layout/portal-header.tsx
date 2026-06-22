@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getNavItemsForRole, isNavItemActive } from "@/lib/constants/navigation";
+import { getNavItemsForPath, isNavItemActive } from "@/lib/constants/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import type { UserRole } from "@/types";
 
@@ -17,7 +17,7 @@ interface PortalHeaderProps {
 }
 
 function getPageTitle(pathname: string, role: UserRole) {
-  const items = getNavItemsForRole(role);
+  const items = getNavItemsForPath(pathname, role);
   const match = items
     .filter((item) => isNavItemActive(pathname, item.href))
     .sort((a, b) => b.href.length - a.href.length)[0];
@@ -40,7 +40,7 @@ export function PortalHeader({ email, fullName, role }: PortalHeaderProps) {
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="truncate text-sm font-medium">{title}</p>
         {isAdminArea ? (
-          <p className="truncate text-xs text-muted-foreground">Administration</p>
+          <p className="truncate text-xs text-muted-foreground">System Admin Dashboard</p>
         ) : null}
       </div>
       <div className="flex items-center gap-1">

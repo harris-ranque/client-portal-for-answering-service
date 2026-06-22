@@ -96,8 +96,8 @@ audit_logs — admin audit trail
 ## Security model
 
 - **Authentication:** Supabase Auth with HTTP-only cookies via `@supabase/ssr`.
-- **Authorization:** `admin` vs `client` role; middleware redirects non-admins away from `/admin`.
-- **Data isolation:** PostgreSQL RLS on all tenant tables; clients restricted to `user_company_ids()`.
+- **Authorization:** System Admin (`admin` role) vs Client User (`client` role). System admins use `/admin/*` only; client users use the client portal routes only.
+- **Data isolation:** PostgreSQL RLS on all client-company tables; client users restricted to `user_company_ids()`.
 - **Secrets:** Supabase secret key, Stripe, JustCall, and HubSpot keys are server-only (`src/lib/env.ts`).
 - **Webhooks:** Stripe events verified with `STRIPE_WEBHOOK_SECRET` before processing.
 - **CSRF posture:** Cookie-authenticated mutating Route Handlers validate `Origin` / `Referer` against `getAppUrl()` (plus localhost and `VERCEL_URL` in preview). Server Actions inherit Next.js CSRF protections; no double-submit token is required for JSON APIs when origin validation passes.

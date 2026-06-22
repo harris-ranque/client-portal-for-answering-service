@@ -5,6 +5,7 @@ import { requireApiAuth } from "@/features/auth/lib/api-auth";
 import { getBillingData } from "@/features/billing/lib/billing.repository";
 import { createBillingPortalSession } from "@/features/billing/lib/stripe-customer-portal";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api";
+import { USER_ROLES } from "@/lib/constants";
 import { isStripeConfigured } from "@/lib/stripe/client";
 import { rejectInvalidOrigin } from "@/lib/security/reject-invalid-origin";
 
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
     return originError;
   }
 
-  const authResult = await requireApiAuth();
+  const authResult = await requireApiAuth({ role: USER_ROLES.client });
 
   if ("response" in authResult) {
     return authResult.response;

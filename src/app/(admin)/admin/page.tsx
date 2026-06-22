@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
-  title: "Admin",
+  title: "System Admin",
 };
 
 async function AdminOverviewContent() {
@@ -39,8 +39,8 @@ async function AdminOverviewContent() {
   return (
     <PageContainer className="space-y-6">
       <PageHeader
-        title="Admin overview"
-        description="Manage clients, users, integrations, and platform configuration."
+        title="System Admin overview"
+        description="Manage clients, users, integrations, and platform analytics."
       />
       <AdminOverview metrics={metrics} />
     </PageContainer>

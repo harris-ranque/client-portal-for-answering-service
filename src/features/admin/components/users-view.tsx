@@ -81,8 +81,8 @@ export function UsersView({ result, companies, filters }: UsersViewProps) {
             className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
           >
             <option value="all">All</option>
-            <option value={USER_ROLES.client}>Client</option>
-            <option value={USER_ROLES.admin}>Admin</option>
+            <option value={USER_ROLES.client}>Client User</option>
+            <option value={USER_ROLES.admin}>System Admin</option>
           </select>
         </div>
         <div className="flex items-end">

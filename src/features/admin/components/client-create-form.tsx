@@ -68,6 +68,18 @@ export function ClientCreateForm() {
               />
               <FieldError errors={state.fieldErrors?.address?.map((message) => ({ message }))} />
             </Field>
+            <Field>
+              <FieldLabel htmlFor="create-stripeCustomerId">Stripe customer ID</FieldLabel>
+              <Input id="create-stripeCustomerId" name="stripeCustomerId" />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="create-hubspotCompanyId">HubSpot company ID</FieldLabel>
+              <Input id="create-hubspotCompanyId" name="hubspotCompanyId" />
+            </Field>
+            <Field>
+              <FieldLabel htmlFor="create-justcallAccountId">JustCall account ID</FieldLabel>
+              <Input id="create-justcallAccountId" name="justcallAccountId" />
+            </Field>
           </FieldGroup>
 
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

@@ -27,6 +27,9 @@ export interface AdminOverviewMetrics {
   totalMinutesThisMonth: number;
   onboardingInProgress: number;
   activeSubscriptions: number;
+  monthlyRevenueCents: number;
+  failedSyncJobs: number;
+  runningSyncJobs: number;
 }
 
 export interface AdminBillingRow {

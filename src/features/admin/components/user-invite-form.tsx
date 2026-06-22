@@ -53,8 +53,8 @@ export function UserInviteForm({ companies }: UserInviteFormProps) {
                 defaultValue={USER_ROLES.client}
                 className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
               >
-                <option value={USER_ROLES.client}>Client</option>
-                <option value={USER_ROLES.admin}>Admin</option>
+                <option value={USER_ROLES.client}>Client User</option>
+                <option value={USER_ROLES.admin}>System Admin</option>
               </select>
             </Field>
             <Field data-invalid={Boolean(state.fieldErrors?.companyId)}>

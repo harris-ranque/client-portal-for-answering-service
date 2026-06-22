@@ -31,6 +31,8 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
   const supabase = await createClient();
   const { start, end } = getCurrentMonthBounds();
   const monthStartIso = new Date(`${start}T00:00:00.000Z`).toISOString();
+  const monthStartDate = new Date(`${start}T00:00:00.000Z`);
+  const monthEndDate = new Date(`${end}T23:59:59.999Z`);
 
   const [
     companiesResult,
@@ -40,6 +42,10 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     usageResult,
     onboardingResult,
     subscriptionsResult,
+    billingResult,
+    hubspotSyncResult,
+    justcallSyncResult,
+    stripeSyncResult,
   ] = await Promise.all([
     supabase.from("companies").select("id, is_active", { count: "exact" }),
     supabase.from("users").select("id", { count: "exact", head: true }),
@@ -61,6 +67,15 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
       .from("subscriptions")
       .select("id", { count: "exact", head: true })
       .in("status", ["active", "trialing"]),
+    supabase
+      .from("billing_records")
+      .select("amount_cents")
+      .eq("status", "paid")
+      .gte("paid_at", monthStartDate.toISOString())
+      .lte("paid_at", monthEndDate.toISOString()),
+    supabase.from("hubspot_sync").select("sync_status"),
+    supabase.from("justcall_sync").select("sync_status"),
+    supabase.from("stripe_sync").select("sync_status"),
   ]);
 
   const companies = companiesResult.data ?? [];
@@ -69,6 +84,17 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     (sum, row) => sum + Number(row.minutes_used),
     0,
   );
+  const monthlyRevenueCents = (billingResult.data ?? []).reduce(
+    (sum, row) => sum + (row.amount_cents ?? 0),
+    0,
+  );
+  const syncStatuses = [
+    ...(hubspotSyncResult.data ?? []),
+    ...(justcallSyncResult.data ?? []),
+    ...(stripeSyncResult.data ?? []),
+  ];
+  const failedSyncJobs = syncStatuses.filter((row) => row.sync_status === "failed").length;
+  const runningSyncJobs = syncStatuses.filter((row) => row.sync_status === "running").length;
 
   return {
     totalCompanies: companiesResult.count ?? companies.length,
@@ -79,6 +105,9 @@ export async function getAdminOverviewMetrics(): Promise<AdminOverviewMetrics> {
     totalMinutesThisMonth,
     onboardingInProgress: onboardingResult.count ?? 0,
     activeSubscriptions: subscriptionsResult.count ?? 0,
+    monthlyRevenueCents,
+    failedSyncJobs,
+    runningSyncJobs,
   };
 }
 

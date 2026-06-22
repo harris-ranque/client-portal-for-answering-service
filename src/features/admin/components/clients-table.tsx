@@ -72,6 +72,30 @@ function ClientEditForm({ client }: { client: AdminCompanyListItem }) {
             )}
           />
         </Field>
+        <Field>
+          <FieldLabel htmlFor={`stripe-${client.id}`}>Stripe customer ID</FieldLabel>
+          <Input
+            id={`stripe-${client.id}`}
+            name="stripeCustomerId"
+            defaultValue={client.stripe_customer_id ?? ""}
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor={`hubspot-${client.id}`}>HubSpot company ID</FieldLabel>
+          <Input
+            id={`hubspot-${client.id}`}
+            name="hubspotCompanyId"
+            defaultValue={client.hubspot_company_id ?? ""}
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor={`justcall-${client.id}`}>JustCall account ID</FieldLabel>
+          <Input
+            id={`justcall-${client.id}`}
+            name="justcallAccountId"
+            defaultValue={client.justcall_account_id ?? ""}
+          />
+        </Field>
       </FieldGroup>
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
       <div className="flex gap-2">

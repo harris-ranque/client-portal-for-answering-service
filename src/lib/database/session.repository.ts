@@ -46,7 +46,11 @@ export async function getSessionProfileFromDatabase(
     .eq("id", userId)
     .maybeSingle();
 
-  if (profileError || !profile || !profile.is_active) {
+  if (profileError || !profile) {
+    return null;
+  }
+
+  if (!profile.is_active) {
     return null;
   }
 
@@ -89,6 +93,21 @@ export const getSessionProfile = cache(
     return getSessionProfileFromDatabase(userId);
   },
 );
+
+export async function isUserProfileInactive(userId: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) {
+    return false;
+  }
+
+  const supabase = await createClient();
+  const { data: profile } = await supabase
+    .from("users")
+    .select("is_active")
+    .eq("id", userId)
+    .maybeSingle();
+
+  return profile !== null && !profile.is_active;
+}
 
 export function mapAuthMetadataToSessionUser(user: {
   id: string;

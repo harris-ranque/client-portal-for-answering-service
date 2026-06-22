@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import { DashboardCompanyCard } from "@/features/dashboard/components/dashboard-company-card";
 import { DashboardGreeting } from "@/features/dashboard/components/dashboard-greeting";
 import { DashboardQuickLinks } from "@/features/dashboard/components/dashboard-quick-links";
@@ -9,34 +7,27 @@ import { DashboardSubscriptionCard } from "@/features/dashboard/components/dashb
 import { DashboardUsageChart } from "@/components/charts/lazy-charts";
 import type { DashboardData } from "@/features/dashboard/types/dashboard.types";
 import { PageContainer } from "@/components/layout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APP_ROUTES } from "@/lib/constants";
 
 interface DashboardViewProps {
   fullName: string | null;
-  role: string;
   data: DashboardData | null;
 }
 
-export function DashboardView({ fullName, role, data }: DashboardViewProps) {
+export function DashboardView({ fullName, data }: DashboardViewProps) {
   if (!data) {
     return (
       <PageContainer>
         <DashboardGreeting fullName={fullName} companyName={null} />
         <Card>
           <CardHeader>
-            <CardTitle>{role === "admin" ? "No company context" : "No company assigned"}</CardTitle>
+            <CardTitle>No company assigned</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <p className="text-sm text-muted-foreground">
-              {role === "admin"
-                ? "Your admin account is not linked to a client company. Use the admin panel to manage organizations."
-                : "Your account is not linked to a company yet. Contact your administrator to get access."}
+              Your account is not linked to a company yet. Contact your answering service provider
+              to get access.
             </p>
-            {role === "admin" ? (
-              <Button render={<Link href={APP_ROUTES.admin.root} />}>Open admin panel</Button>
-            ) : null}
           </CardContent>
         </Card>
       </PageContainer>

@@ -10,6 +10,8 @@ import {
 import {
   generateAdminPasswordResetLink,
   inviteAdminUser,
+  resendAdminUserInvitation,
+  revokeAdminUserSessions,
   setAdminUserActive,
 } from "@/features/admin/lib/users.repository";
 import { inviteUserSchema, userIdSchema } from "@/features/admin/schemas/user.schema";
@@ -107,6 +109,11 @@ export async function toggleUserActiveAction(
 
   try {
     await setAdminUserActive(parsed.data.userId, isActive);
+
+    if (!isActive) {
+      await revokeAdminUserSessions(parsed.data.userId);
+    }
+
     await writeAuditLog({
       actorId: access.user.id,
       action: isActive ? "user.activate" : "user.deactivate",
@@ -118,6 +125,38 @@ export async function toggleUserActiveAction(
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : "Failed to update user status.",
+    };
+  }
+}
+
+export async function resendInvitationAction(
+  _previousState: AdminActionState,
+  formData: FormData,
+): Promise<AdminActionState> {
+  const access = await requireAdminAction();
+
+  if ("error" in access) {
+    return { error: access.error };
+  }
+
+  const email = formData.get("email")?.toString();
+
+  if (!email) {
+    return { error: "User email is required." };
+  }
+
+  try {
+    const inviteLink = await resendAdminUserInvitation(email);
+    await writeAuditLog({
+      actorId: access.user.id,
+      action: "user.invite_resend",
+      entityType: "user",
+      metadata: { email },
+    });
+    return { success: true, resetLink: inviteLink };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Failed to resend invitation.",
     };
   }
 }

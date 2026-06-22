@@ -25,6 +25,17 @@
 - User `role` must be `admin` in `users` table and/or `app_metadata.role`.
 - Sign out and back in after role changes.
 
+### Invitation or password reset links fail
+
+- Add `/forgot-password`, `/reset-password`, `/accept-invitation`, and `/auth/callback` to Supabase **Authentication → URL Configuration** redirect allow list.
+- Local `supabase/config.toml` includes these URLs under `additional_redirect_urls`.
+- Invitations redirect to `/accept-invitation`; recovery links redirect to `/reset-password`.
+
+### Deactivated user can still access the portal
+
+- Deactivated users should be signed out on the next request. If access persists, sign out manually and verify `users.is_active = false`.
+- Ensure `SUPABASE_SECRET_KEY` is set so session revocation runs when deactivating accounts.
+
 ## Supabase
 
 ### Build works but data pages are empty

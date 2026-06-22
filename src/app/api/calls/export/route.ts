@@ -5,9 +5,10 @@ import { getCallLogsForExport } from "@/features/calls/lib/calls.repository";
 import { callLogsToCsv } from "@/features/calls/lib/csv";
 import { parseCallLogsSearchParams } from "@/features/calls/lib/parse-query";
 import { createErrorResponse } from "@/lib/api";
+import { USER_ROLES } from "@/lib/constants";
 
 export async function GET(request: Request) {
-  const authResult = await requireApiAuth();
+  const authResult = await requireApiAuth({ role: USER_ROLES.client });
 
   if ("response" in authResult) {
     return authResult.response;

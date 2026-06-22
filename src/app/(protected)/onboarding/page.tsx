@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
-import { requireAuth, getSessionUserWithCompany } from "@/features/auth";
+import { requireClient, getSessionUserWithCompany } from "@/features/auth";
 import { getCompanyOnboarding, OnboardingView } from "@/features/onboarding";
 import { LoadingSkeleton } from "@/components/feedback";
 import { PageContainer, PageHeader } from "@/components/layout";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APP_ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -24,7 +21,7 @@ function OnboardingContentFallback() {
 }
 
 async function OnboardingContent() {
-  const user = await requireAuth();
+  const user = await requireClient();
   const sessionData = await getSessionUserWithCompany();
   const companyId = sessionData?.session?.companyId ?? user.companyId;
 
@@ -41,17 +38,12 @@ async function OnboardingContent() {
               {!isSupabaseConfigured() ? "Supabase not configured" : "No company assigned"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <p className="text-sm text-muted-foreground">
               {!isSupabaseConfigured()
                 ? "Configure Supabase credentials to load onboarding status."
-                : "Your account is not linked to a company yet."}
+                : "Your account is not linked to a company yet. Contact your answering service provider."}
             </p>
-            {user.role === "admin" ? (
-              <Button render={<Link href={APP_ROUTES.admin.onboarding} />}>
-                Manage onboarding
-              </Button>
-            ) : null}
           </CardContent>
         </Card>
       </PageContainer>

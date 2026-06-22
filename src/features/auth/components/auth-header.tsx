@@ -4,6 +4,8 @@ import { LogoutButton } from "@/features/auth/components/logout-button";
 import { getSessionUser } from "@/features/auth/lib/session";
 import { Button } from "@/components/ui/button";
 import { APP_ROUTES } from "@/lib/constants";
+import { getHomeRouteForRole } from "@/lib/constants/navigation";
+import { getUserRoleLabel } from "@/lib/constants/role-labels";
 import { clientEnv } from "@/lib/env";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
@@ -51,10 +53,12 @@ export async function AuthHeader() {
     );
   }
 
+  const homeHref = getHomeRouteForRole(user.role);
+
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-        <Link href={APP_ROUTES.dashboard} className="flex items-center gap-2.5">
+        <Link href={homeHref} className="flex items-center gap-2.5">
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">
             CP
           </div>
@@ -63,10 +67,10 @@ export async function AuthHeader() {
         <div className="flex items-center gap-3">
           <div className="hidden min-w-0 text-right sm:block">
             <p className="truncate text-sm font-medium">{user.email}</p>
-            <p className="truncate text-xs text-muted-foreground capitalize">{user.role}</p>
+            <p className="truncate text-xs text-muted-foreground">{getUserRoleLabel(user.role)}</p>
           </div>
-          <Button variant="outline" size="sm" render={<Link href={APP_ROUTES.dashboard} />}>
-            Dashboard
+          <Button variant="outline" size="sm" render={<Link href={homeHref} />}>
+            {user.role === "admin" ? "Admin dashboard" : "Dashboard"}
           </Button>
           <LogoutButton size="sm" />
         </div>

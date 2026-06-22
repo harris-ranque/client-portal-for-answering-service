@@ -4,9 +4,10 @@ import { requireApiAuth } from "@/features/auth/lib/api-auth";
 import { getBillingData } from "@/features/billing/lib/billing.repository";
 import { billingQuerySchema } from "@/features/billing/schemas/billing-query.schema";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api";
+import { USER_ROLES } from "@/lib/constants";
 
 export async function GET(request: Request) {
-  const authResult = await requireApiAuth();
+  const authResult = await requireApiAuth({ role: USER_ROLES.client });
 
   if ("response" in authResult) {
     return authResult.response;

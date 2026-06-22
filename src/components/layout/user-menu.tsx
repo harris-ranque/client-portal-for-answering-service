@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getUserRoleLabel } from "@/lib/constants/role-labels";
 import type { UserRole } from "@/types";
 
 interface UserMenuProps {
@@ -55,7 +56,7 @@ export function UserMenu({ email, fullName, role }: UserMenuProps) {
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col gap-1">
               <p className="text-sm font-medium">{fullName ?? email}</p>
-              <p className="text-xs text-muted-foreground capitalize">{role}</p>
+              <p className="text-xs text-muted-foreground">{getUserRoleLabel(role)}</p>
             </div>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

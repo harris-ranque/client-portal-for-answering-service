@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { requireApiAuth } from "@/features/auth/lib/api-auth";
 import { getProfileData } from "@/features/profile/lib/profile.repository";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api";
+import { USER_ROLES } from "@/lib/constants";
 
 export async function GET() {
-  const authResult = await requireApiAuth();
+  const authResult = await requireApiAuth({ role: USER_ROLES.client });
 
   if ("response" in authResult) {
     return authResult.response;

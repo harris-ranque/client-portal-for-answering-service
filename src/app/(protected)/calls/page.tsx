@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
-import { requireAuth, getSessionUserWithCompany } from "@/features/auth";
+import { requireClient, getSessionUserWithCompany } from "@/features/auth";
 import { CallLogsView } from "@/features/calls/components/call-logs-view";
 import { getCallLogs } from "@/features/calls/lib/calls.repository";
 import {
@@ -11,9 +10,7 @@ import {
 } from "@/features/calls/lib/parse-query";
 import { PageContainer, PageHeader } from "@/components/layout";
 import { ErrorState, LoadingSkeleton } from "@/components/feedback";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { APP_ROUTES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export const metadata: Metadata = {
@@ -33,7 +30,7 @@ function CallsContentFallback() {
 }
 
 async function CallsContent({ searchParams }: CallsPageProps) {
-  const user = await requireAuth();
+  const user = await requireClient();
   const sessionData = await getSessionUserWithCompany();
   const companyId = sessionData?.session?.companyId ?? user.companyId;
   const params = await searchParams;
@@ -50,15 +47,12 @@ async function CallsContent({ searchParams }: CallsPageProps) {
               {!isSupabaseConfigured() ? "Supabase not configured" : "No company assigned"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent>
             <p className="text-sm text-muted-foreground">
               {!isSupabaseConfigured()
                 ? "Configure Supabase credentials to load call history."
-                : "Your account is not linked to a company yet."}
+                : "Your account is not linked to a company yet. Contact your answering service provider."}
             </p>
-            {user.role === "admin" ? (
-              <Button render={<Link href={APP_ROUTES.admin.root} />}>Open admin panel</Button>
-            ) : null}
           </CardContent>
         </Card>
       </PageContainer>

@@ -3,6 +3,7 @@ import { cache } from "react";
 import { getAuthUser } from "@/lib/supabase/auth";
 import {
   getSessionProfile,
+  isUserProfileInactive,
   mapAuthMetadataToSessionUser,
   mapProfileToSessionUser,
 } from "@/lib/database/session.repository";
@@ -41,6 +42,10 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     return null;
   }
 
+  if (await isUserProfileInactive(authUser.id)) {
+    return null;
+  }
+
   const sessionProfile = await getSessionProfile(authUser.id);
 
   if (sessionProfile) {
@@ -58,6 +63,10 @@ export const getSessionUserWithCompany = cache(async () => {
   const authUser = await getAuthUser();
 
   if (!authUser?.email) {
+    return null;
+  }
+
+  if (await isUserProfileInactive(authUser.id)) {
     return null;
   }
 

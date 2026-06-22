@@ -82,6 +82,16 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
+  if (user && isProtectedRoute(pathname)) {
+    const sessionUser = mapAuthUserToSessionUser(user);
+
+    if (sessionUser.role === USER_ROLES.admin) {
+      return redirectWithSupabaseCookies(request, supabaseResponse, APP_ROUTES.admin.root, {
+        clearSearch: true,
+      });
+    }
+  }
+
   if (!user && (isProtectedRoute(pathname) || isAdminRoute(pathname))) {
     return redirectWithSupabaseCookies(request, supabaseResponse, APP_ROUTES.login, {
       searchParams: { redirectTo: pathname },

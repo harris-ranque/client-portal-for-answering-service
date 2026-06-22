@@ -1,7 +1,17 @@
 -- Development seed data for local Supabase
 -- Run via: npm run supabase:reset
 
-INSERT INTO public.companies (id, name, email, phone, address, is_active)
+INSERT INTO public.companies (
+  id,
+  name,
+  email,
+  phone,
+  address,
+  is_active,
+  stripe_customer_id,
+  justcall_account_id,
+  hubspot_company_id
+)
 VALUES
   (
     '11111111-1111-1111-1111-111111111111',
@@ -9,7 +19,10 @@ VALUES
     'billing@acme.example.com',
     '+1 (555) 010-1000',
     '123 Main Street, Austin, TX',
-    TRUE
+    TRUE,
+    'cus_demo_acme',
+    '+15550101000',
+    'hs_demo_acme'
   ),
   (
     '22222222-2222-2222-2222-222222222222',
@@ -17,7 +30,10 @@ VALUES
     'hello@beta.example.com',
     '+1 (555) 010-2000',
     '456 Oak Avenue, Denver, CO',
-    TRUE
+    TRUE,
+    NULL,
+    NULL,
+    NULL
   )
 ON CONFLICT (id) DO NOTHING;
 
@@ -66,13 +82,6 @@ VALUES
     DATE_TRUNC('month', TIMEZONE('utc', NOW())) + INTERVAL '1 month' - INTERVAL '1 second'
   )
 ON CONFLICT (id) DO NOTHING;
-
-UPDATE public.companies
-SET
-  stripe_customer_id = 'cus_demo_acme',
-  justcall_account_id = '+15550101000',
-  hubspot_company_id = 'hs_demo_acme'
-WHERE id = '11111111-1111-1111-1111-111111111111';
 
 UPDATE public.subscriptions
 SET
@@ -312,9 +321,9 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- Profiles are created by handle_new_user trigger; ensure membership for client
-INSERT INTO public.company_members (user_id, company_id, role)
+INSERT INTO public.company_members (user_id, company_id)
 VALUES
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111', 'client')
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', '11111111-1111-1111-1111-111111111111')
 ON CONFLICT (user_id, company_id) DO NOTHING;
 
 INSERT INTO public.company_contacts (
