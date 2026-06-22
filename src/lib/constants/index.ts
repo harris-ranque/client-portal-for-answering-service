@@ -16,6 +16,7 @@ export const APP_ROUTES = {
     onboarding: "/admin/onboarding",
     integrations: "/admin/integrations",
     metrics: "/admin/metrics",
+    audit: "/admin/audit",
   },
 } as const;
 

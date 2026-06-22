@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
   Building2,
+  ClipboardList,
   CreditCard,
   LayoutDashboard,
   Link2,
@@ -95,6 +96,11 @@ export const ADMIN_NAV_ITEMS: NavItem[] = [
     href: APP_ROUTES.admin.metrics,
     icon: BarChart3,
   },
+  {
+    title: "Audit Log",
+    href: APP_ROUTES.admin.audit,
+    icon: ClipboardList,
+  },
 ];
 
 export const ACCOUNT_NAV_ITEMS: NavItem[] = [
@@ -104,6 +110,14 @@ export const ACCOUNT_NAV_ITEMS: NavItem[] = [
     icon: Settings,
   },
 ];
+
+export function getNavItemsForRole(role: "admin" | "client") {
+  return role === "admin" ? ADMIN_NAV_ITEMS : CLIENT_NAV_ITEMS;
+}
+
+export function getHomeRouteForRole(role: "admin" | "client") {
+  return role === "admin" ? APP_ROUTES.admin.root : APP_ROUTES.dashboard;
+}
 
 export function isNavItemActive(pathname: string, href: string) {
   if (href === APP_ROUTES.dashboard || href === APP_ROUTES.admin.root) {

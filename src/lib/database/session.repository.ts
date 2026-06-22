@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { USER_ROLES } from "@/lib/constants";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -78,13 +80,15 @@ export async function getSessionProfileFromDatabase(
   };
 }
 
-export async function getSessionProfile(userId: string): Promise<SessionProfile | null> {
-  if (!isSupabaseConfigured()) {
-    return null;
-  }
+export const getSessionProfile = cache(
+  async (userId: string): Promise<SessionProfile | null> => {
+    if (!isSupabaseConfigured()) {
+      return null;
+    }
 
-  return getSessionProfileFromDatabase(userId);
-}
+    return getSessionProfileFromDatabase(userId);
+  },
+);
 
 export function mapAuthMetadataToSessionUser(user: {
   id: string;

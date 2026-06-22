@@ -29,6 +29,9 @@ EXECUTE FUNCTION public.set_updated_at();
 -- ---------------------------------------------------------------------------
 ALTER TABLE public.company_contacts ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.company_contacts TO authenticated;
+GRANT SELECT ON public.company_contacts TO anon;
+
 CREATE POLICY companies_update_member ON public.companies
 FOR UPDATE
 USING (public.user_has_company_access(id))

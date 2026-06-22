@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 import { loginAction, type LoginActionState } from "@/features/auth/actions/login";
 import { Button } from "@/components/ui/button";
@@ -16,8 +17,26 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ redirectTo }: LoginFormProps) {
-  const [state, formAction, isPending] = useActionState(loginAction, initialState);
+  const router = useRouter();
+  const [state, setState] = useState<LoginActionState>(initialState);
+  const [isPending, startTransition] = useTransition();
   const supabaseReady = isSupabaseConfigured();
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    startTransition(async () => {
+      const result = await loginAction(state, formData);
+      setState(result);
+
+      if (result.redirectTo) {
+        router.replace(result.redirectTo);
+        return;
+      }
+    });
+  }
 
   return (
     <Card className="w-full max-w-md">
@@ -32,11 +51,11 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
             stack before signing in.
           </p>
         ) : (
-          <form action={formAction} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
 
             <FieldGroup>
-              <Field data-invalid={Boolean(state.fieldErrors?.email)}>
+              <Field data-invalid={Boolean(state.fieldErrors?.email?.length)}>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
@@ -45,12 +64,12 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   autoComplete="email"
                   placeholder="you@company.com"
                   required
-                  aria-invalid={Boolean(state.fieldErrors?.email)}
+                  aria-invalid={Boolean(state.fieldErrors?.email?.length)}
                 />
                 <FieldError errors={state.fieldErrors?.email?.map((message) => ({ message }))} />
               </Field>
 
-              <Field data-invalid={Boolean(state.fieldErrors?.password)}>
+              <Field data-invalid={Boolean(state.fieldErrors?.password?.length)}>
                 <FieldLabel htmlFor="password">Password</FieldLabel>
                 <Input
                   id="password"
@@ -58,9 +77,11 @@ export function LoginForm({ redirectTo }: LoginFormProps) {
                   type="password"
                   autoComplete="current-password"
                   required
-                  aria-invalid={Boolean(state.fieldErrors?.password)}
+                  aria-invalid={Boolean(state.fieldErrors?.password?.length)}
                 />
-                <FieldError errors={state.fieldErrors?.password?.map((message) => ({ message }))} />
+                <FieldError
+                  errors={state.fieldErrors?.password?.map((message) => ({ message }))}
+                />
               </Field>
             </FieldGroup>
 

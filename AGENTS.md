@@ -23,7 +23,7 @@ Production Next.js 15 client portal (App Router, React 19, TypeScript, Tailwind 
 
 - **Feature modules:** `src/features/<name>/` with components, lib, schemas, types
 - **Integrations:** API clients in `src/lib/<service>/`, sync logic in `src/features/<service>/`
-- **Supabase:** server client in Route Handlers/Server Components; admin client only for service-role writes
+- **Supabase:** server client in Route Handlers/Server Components; admin client only for secret-key writes
 - **Auth:** `requireAuth()` / `requireAdmin()` in pages; `requireApiAuth()` in API routes
 - **Client components importing layout:** use `@/components/layout/page-shell` directly, not the layout barrel
 - **Tests:** Vitest + Testing Library; `*.test.ts(x)` next to source; run `npm test`
@@ -31,6 +31,6 @@ Production Next.js 15 client portal (App Router, React 19, TypeScript, Tailwind 
 
 ## Do not
 
-- Expose `SUPABASE_SERVICE_ROLE_KEY` or integration secrets to the client
+- Expose `SUPABASE_SECRET_KEY` or integration secrets to the client
 - Import server-only code into client bundles
 - Commit `.env` or real credentials

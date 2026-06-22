@@ -3,13 +3,16 @@
 import { redirect } from "next/navigation";
 
 import { getSafeRedirectPath } from "@/features/auth/lib/routes";
+import { mapAuthUserToSessionUser } from "@/features/auth/lib/session";
 import { loginSchema } from "@/features/auth/schemas/login.schema";
 import { DEFAULT_AUTH_REDIRECT } from "@/lib/constants";
-import { createServerClient } from "@/lib/supabase/server";
+import { getHomeRouteForRole } from "@/lib/constants/navigation";
+import { createServerActionClient, createServerClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export type LoginActionState = {
   error?: string;
+  redirectTo?: string;
   fieldErrors?: {
     email?: string[];
     password?: string[];
@@ -43,27 +46,30 @@ export async function loginAction(
     };
   }
 
-  const supabase = await createServerClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const supabase = await createServerActionClient();
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    return {
-      error:
-        error.message === "Invalid login credentials"
-          ? "Invalid email or password."
-          : error.message,
-    };
+    const message =
+      error.message === "Invalid login credentials"
+        ? "Invalid email or password."
+        : error.message.includes("Database error querying schema")
+          ? "Authentication service error. If using local seed users, run `npm run supabase:reset` to refresh auth data."
+          : error.message;
+
+    return { error: message };
   }
 
+  const sessionUser = data.user ? mapAuthUserToSessionUser(data.user) : null;
   const redirectTo = getSafeRedirectPath(
     formData.get("redirectTo")?.toString(),
-    DEFAULT_AUTH_REDIRECT,
+    sessionUser ? getHomeRouteForRole(sessionUser.role) : DEFAULT_AUTH_REDIRECT,
   );
 
-  redirect(redirectTo);
+  return { redirectTo };
 }
 
-export async function redirectIfAuthenticated(redirectTo = DEFAULT_AUTH_REDIRECT) {
+export async function redirectIfAuthenticated(redirectTo?: string) {
   if (!isSupabaseConfigured()) {
     return;
   }
@@ -74,6 +80,7 @@ export async function redirectIfAuthenticated(redirectTo = DEFAULT_AUTH_REDIRECT
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect(redirectTo);
+    const sessionUser = mapAuthUserToSessionUser(user);
+    redirect(redirectTo ?? getHomeRouteForRole(sessionUser.role));
   }
 }

@@ -1,7 +1,9 @@
+import { cache } from "react";
+
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
-export async function getAuthUser() {
+export const getAuthUser = cache(async () => {
   if (!isSupabaseConfigured()) {
     return null;
   }
@@ -17,9 +19,9 @@ export async function getAuthUser() {
   }
 
   return user;
-}
+});
 
-export async function getAuthSession() {
+export const getAuthSession = cache(async () => {
   if (!isSupabaseConfigured()) {
     return null;
   }
@@ -35,4 +37,4 @@ export async function getAuthSession() {
   }
 
   return session;
-}
+});

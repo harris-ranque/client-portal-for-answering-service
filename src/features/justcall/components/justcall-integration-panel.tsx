@@ -127,7 +127,7 @@ export function JustCallIntegrationPanel({
 
         {!adminReady ? (
           <p className="text-sm text-muted-foreground">
-            Set `SUPABASE_SERVICE_ROLE_KEY` to write sync jobs and upsert call records.
+Set `SUPABASE_SECRET_KEY` to write sync jobs and upsert call records.
           </p>
         ) : null}
 

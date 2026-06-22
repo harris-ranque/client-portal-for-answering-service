@@ -2,9 +2,15 @@
 
 ## Authentication
 
+### Login does nothing or shows "Database error querying schema"
+
+- Local seed users require empty-string token columns in `auth.users`. Run `npm run supabase:reset` after pulling latest `supabase/seed.sql`.
+- Use `PUBLISHABLE_KEY` and `SECRET_KEY` from `supabase status` (or the Supabase dashboard API settings).
+- Ensure `.env.local` overrides `.env` for local dev (Next.js loads both; `.env.local` wins).
+
 ### Redirect loop or immediate logout
 
-- Confirm `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` match your Supabase project.
+- Confirm `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` match your Supabase project.
 - In Supabase **Authentication → URL Configuration**, set Site URL and Redirect URLs to match `NEXT_PUBLIC_APP_URL` (include `/auth/callback`).
 - On Vercel, ensure `NEXT_PUBLIC_APP_URL` is the canonical production URL, not `localhost`.
 
@@ -29,7 +35,7 @@
 ### RLS permission errors
 
 - Client writes to company data require membership and matching RLS policies.
-- Admin-only operations (sync, invites) need `SUPABASE_SERVICE_ROLE_KEY` on the server.
+- Admin-only operations (sync, invites) need `SUPABASE_SECRET_KEY` on the server.
 
 ### Migrations out of sync
 
@@ -44,7 +50,7 @@ npm run supabase:types          # regenerate TypeScript types
 ### JustCall / HubSpot sync returns 503
 
 - Verify API credentials in environment variables.
-- Confirm `SUPABASE_SERVICE_ROLE_KEY` is set (required for sync writes).
+- Confirm `SUPABASE_SECRET_KEY` is set (required for sync writes).
 - Map companies via `justcall_account_id` or `hubspot_company_id` before expecting records to link.
 
 ### Stripe webhooks fail with 400

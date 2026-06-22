@@ -5,6 +5,7 @@ import {
 } from "@/features/justcall/lib/mappers";
 import { listJustCallCalls } from "@/lib/justcall";
 import type { JustCallCall } from "@/lib/justcall/types";
+import { aggregateUsageForCompanies } from "@/features/usage/lib/aggregate-usage.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 interface SyncCallsOptions {
@@ -89,6 +90,11 @@ export async function syncJustCallCalls(options: SyncCallsOptions = {}) {
     .filter((record): record is NonNullable<typeof record> => record !== null);
 
   const processed = await upsertCallLogs(mapped);
+  const affectedCompanyIds = [...new Set(mapped.map((record) => record.company_id))];
+
+  if (affectedCompanyIds.length > 0) {
+    await aggregateUsageForCompanies(affectedCompanyIds);
+  }
 
   return {
     fetched: calls.length,

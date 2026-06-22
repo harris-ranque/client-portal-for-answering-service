@@ -7,8 +7,15 @@ import { isJustCallConfigured } from "@/lib/justcall";
 import { isSupabaseAdminConfigured } from "@/lib/supabase/config";
 import { USER_ROLES } from "@/lib/constants";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api";
+import { rejectInvalidOrigin } from "@/lib/security/reject-invalid-origin";
 
 export async function POST(request: Request) {
+  const originError = rejectInvalidOrigin(request);
+
+  if (originError) {
+    return originError;
+  }
+
   const authResult = await requireApiAuth({ role: USER_ROLES.admin });
 
   if ("response" in authResult) {
@@ -29,7 +36,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       createErrorResponse(
         "SUPABASE_ADMIN_NOT_CONFIGURED",
-        "SUPABASE_SERVICE_ROLE_KEY is required to run JustCall sync jobs.",
+        "SUPABASE_SECRET_KEY is required to run JustCall sync jobs.",
       ),
       { status: 503 },
     );

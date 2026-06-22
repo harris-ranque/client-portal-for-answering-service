@@ -4,8 +4,8 @@ export {
   getSupabasePublicConfig,
   getSupabasePublicConfigOrNull,
   isSupabaseAdminConfigured,
-  isSupabaseAnonKeyPlaceholder,
   isSupabaseConfigured,
-  isSupabaseServiceRoleKeyPlaceholder,
+  isSupabasePublishableKeyPlaceholder,
+  isSupabaseSecretKeyPlaceholder,
   isSupabaseUrlPlaceholder,
 } from "@/lib/supabase/config";

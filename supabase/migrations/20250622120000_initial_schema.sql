@@ -55,50 +55,6 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.is_admin()
-RETURNS BOOLEAN
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT EXISTS (
-    SELECT 1
-    FROM public.users
-    WHERE id = auth.uid()
-      AND role = 'admin'
-      AND is_active = TRUE
-  );
-$$;
-
-CREATE OR REPLACE FUNCTION public.user_company_ids()
-RETURNS SETOF UUID
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT company_id
-  FROM public.company_members
-  WHERE user_id = auth.uid();
-$$;
-
-CREATE OR REPLACE FUNCTION public.user_has_company_access(target_company_id UUID)
-RETURNS BOOLEAN
-LANGUAGE sql
-STABLE
-SECURITY DEFINER
-SET search_path = public
-AS $$
-  SELECT public.is_admin()
-    OR EXISTS (
-      SELECT 1
-      FROM public.company_members
-      WHERE user_id = auth.uid()
-        AND company_id = target_company_id
-    );
-$$;
-
 -- ---------------------------------------------------------------------------
 -- users
 -- ---------------------------------------------------------------------------
@@ -168,6 +124,53 @@ CREATE TRIGGER company_members_set_updated_at
 BEFORE UPDATE ON public.company_members
 FOR EACH ROW
 EXECUTE FUNCTION public.set_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- RLS helper functions (require users + company_members tables)
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+    FROM public.users
+    WHERE id = auth.uid()
+      AND role = 'admin'
+      AND is_active = TRUE
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.user_company_ids()
+RETURNS SETOF UUID
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT company_id
+  FROM public.company_members
+  WHERE user_id = auth.uid();
+$$;
+
+CREATE OR REPLACE FUNCTION public.user_has_company_access(target_company_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT public.is_admin()
+    OR EXISTS (
+      SELECT 1
+      FROM public.company_members
+      WHERE user_id = auth.uid()
+        AND company_id = target_company_id
+    );
+$$;
 
 -- ---------------------------------------------------------------------------
 -- call_logs

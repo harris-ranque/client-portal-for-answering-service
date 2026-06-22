@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -50,18 +51,22 @@ export function UserMenu({ email, fullName, role }: UserMenuProps) {
         }
       />
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col gap-1">
-            <p className="text-sm font-medium">{fullName ?? email}</p>
-            <p className="text-xs text-muted-foreground capitalize">{role}</p>
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col gap-1">
+              <p className="text-sm font-medium">{fullName ?? email}</p>
+              <p className="text-xs text-muted-foreground capitalize">{role}</p>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem render={<Link href="/profile" />}>
-          <UserRound className="size-4" />
-          Profile
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {role === "client" ? (
+          <DropdownMenuItem render={<Link href="/profile" />}>
+            <UserRound className="size-4" />
+            Profile
+          </DropdownMenuItem>
+        ) : null}
+        {role === "client" ? <DropdownMenuSeparator /> : null}
         <DropdownMenuItem
           variant="destructive"
           onClick={() => {

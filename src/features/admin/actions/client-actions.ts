@@ -13,6 +13,7 @@ import {
   updateAdminClient,
 } from "@/features/admin/lib/clients.repository";
 import { clientFormSchema, clientIdSchema } from "@/features/admin/schemas/client.schema";
+import { writeAuditLog } from "@/lib/audit/audit-log.service";
 import { APP_ROUTES } from "@/lib/constants";
 
 export async function createClientAction(
@@ -32,7 +33,15 @@ export async function createClientAction(
   }
 
   try {
-    await createAdminClient(parsed.data);
+    const created = await createAdminClient(parsed.data);
+    await writeAuditLog({
+      actorId: access.user.id,
+      companyId: created.id,
+      action: "client.create",
+      entityType: "company",
+      entityId: created.id,
+      metadata: { name: parsed.data.name },
+    });
     revalidatePath(APP_ROUTES.admin.clients);
     return { success: true };
   } catch (error) {
@@ -66,6 +75,14 @@ export async function updateClientAction(
 
   try {
     await updateAdminClient(idParsed.data.clientId, parsed.data);
+    await writeAuditLog({
+      actorId: access.user.id,
+      companyId: idParsed.data.clientId,
+      action: "client.update",
+      entityType: "company",
+      entityId: idParsed.data.clientId,
+      metadata: { name: parsed.data.name },
+    });
     revalidatePath(APP_ROUTES.admin.clients);
     return { success: true };
   } catch (error) {
@@ -95,6 +112,13 @@ export async function toggleClientActiveAction(
 
   try {
     await setAdminClientActive(parsed.data.clientId, isActive);
+    await writeAuditLog({
+      actorId: access.user.id,
+      companyId: parsed.data.clientId,
+      action: isActive ? "client.activate" : "client.deactivate",
+      entityType: "company",
+      entityId: parsed.data.clientId,
+    });
     revalidatePath(APP_ROUTES.admin.clients);
     return { success: true };
   } catch (error) {

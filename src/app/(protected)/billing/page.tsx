@@ -6,7 +6,7 @@ import { requireAuth, getSessionUserWithCompany } from "@/features/auth";
 import { BillingView } from "@/features/billing/components/billing-view";
 import { getBillingData } from "@/features/billing/lib/billing.repository";
 import { billingQuerySchema } from "@/features/billing/schemas/billing-query.schema";
-import { LoadingSkeleton } from "@/components/feedback";
+import { LoadingSkeleton, ErrorState } from "@/components/feedback";
 import { PageContainer, PageHeader } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -67,7 +67,23 @@ async function BillingContent({ searchParams }: BillingPageProps) {
     );
   }
 
-  const data = await getBillingData(companyId, query.page, query.pageSize);
+  let data;
+
+  try {
+    data = await getBillingData(companyId, query.page, query.pageSize);
+  } catch (error) {
+    return (
+      <PageContainer>
+        <PageHeader
+          title="Billing"
+          description="View your plan, invoices, payment status, and manage billing."
+        />
+        <ErrorState
+          message={error instanceof Error ? error.message : "Unable to load billing information."}
+        />
+      </PageContainer>
+    );
+  }
 
   if (!data) {
     return (

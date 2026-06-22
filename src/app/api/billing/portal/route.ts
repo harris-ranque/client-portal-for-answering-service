@@ -6,12 +6,19 @@ import { getBillingData } from "@/features/billing/lib/billing.repository";
 import { createBillingPortalSession } from "@/features/billing/lib/stripe-customer-portal";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api";
 import { isStripeConfigured } from "@/lib/stripe/client";
+import { rejectInvalidOrigin } from "@/lib/security/reject-invalid-origin";
 
 const portalRequestSchema = z.object({
   returnUrl: z.string().url().optional(),
 });
 
 export async function POST(request: Request) {
+  const originError = rejectInvalidOrigin(request);
+
+  if (originError) {
+    return originError;
+  }
+
   const authResult = await requireApiAuth();
 
   if ("response" in authResult) {

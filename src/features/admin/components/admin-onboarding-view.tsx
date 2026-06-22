@@ -1,4 +1,5 @@
 import type { AdminOnboardingRow } from "@/features/admin/types/admin.types";
+import { AdminOnboardingEditSheet } from "@/features/admin/components/admin-onboarding-edit-sheet";
 import { PageContainer, PageHeader } from "@/components/layout";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +39,7 @@ export function AdminOnboardingView({ rows }: AdminOnboardingViewProps) {
                   <TableHead>Status</TableHead>
                   <TableHead>Current step</TableHead>
                   <TableHead>Completed</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -58,6 +60,9 @@ export function AdminOnboardingView({ rows }: AdminOnboardingViewProps) {
                             year: "numeric",
                           }).format(new Date(row.onboarding.completed_at))
                         : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <AdminOnboardingEditSheet row={row} />
                     </TableCell>
                   </TableRow>
                 ))}

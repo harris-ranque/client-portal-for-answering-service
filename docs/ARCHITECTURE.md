@@ -24,14 +24,14 @@ Each domain lives under `src/features/<name>/`:
 | `auth` | Login, session, route guards, middleware integration |
 | `dashboard` | Client overview, stats, recent calls |
 | `calls` | Call log listing, filters, CSV export |
-| `usage` | Monthly usage charts and history |
+| `usage` | Monthly usage charts, history, and call-log aggregation pipeline |
 | `billing` | Subscriptions, invoices, Stripe portal |
 | `profile` | Company profile and contacts |
 | `admin` | Clients, users, cross-company views |
 | `justcall` | JustCall sync jobs and admin UI |
 | `hubspot` | HubSpot sync jobs and admin UI |
 | `stripe` | Stripe webhooks, sync jobs, admin UI |
-| `onboarding` | Onboarding status (read-focused) |
+| `onboarding` | Onboarding status, client progress page, admin management |
 
 Typical module layout:
 
@@ -65,7 +65,7 @@ Shared integration clients live in `src/lib/<service>/` (e.g. `justcall`, `hubsp
 
 ### Integration sync / webhook
 
-1. Admin sync: authenticated admin POST → service role Supabase writes.
+1. Admin sync: authenticated admin POST → secret-key Supabase writes.
 2. Stripe webhook: signature verification → idempotent `stripe_sync` record → upsert billing data.
 
 ## Data model (high level)
@@ -90,7 +90,7 @@ audit_logs — admin audit trail
 | ------ | ---- | ----------- |
 | Browser | `src/lib/supabase/client.ts` | Client Components |
 | Server | `src/lib/supabase/server.ts` | Server Components, Route Handlers (RLS applies) |
-| Admin | `src/lib/supabase/admin.ts` | Service-role writes (sync, invites) — never expose to client |
+| Admin | `src/lib/supabase/admin.ts` | Secret-key writes (sync, invites) — never expose to client |
 | Middleware | `src/lib/supabase/middleware.ts` | Session refresh on navigation |
 
 ## Security model
@@ -98,8 +98,33 @@ audit_logs — admin audit trail
 - **Authentication:** Supabase Auth with HTTP-only cookies via `@supabase/ssr`.
 - **Authorization:** `admin` vs `client` role; middleware redirects non-admins away from `/admin`.
 - **Data isolation:** PostgreSQL RLS on all tenant tables; clients restricted to `user_company_ids()`.
-- **Secrets:** Service role, Stripe, JustCall, and HubSpot keys are server-only (`src/lib/env.ts`).
+- **Secrets:** Supabase secret key, Stripe, JustCall, and HubSpot keys are server-only (`src/lib/env.ts`).
 - **Webhooks:** Stripe events verified with `STRIPE_WEBHOOK_SECRET` before processing.
+- **CSRF posture:** Cookie-authenticated mutating Route Handlers validate `Origin` / `Referer` against `getAppUrl()` (plus localhost and `VERCEL_URL` in preview). Server Actions inherit Next.js CSRF protections; no double-submit token is required for JSON APIs when origin validation passes.
+
+## Usage metrics pipeline
+
+`usage_metrics` rows are aggregated from `call_logs` by `aggregateUsageForCompany()`:
+
+- Triggered automatically after JustCall call sync for affected companies
+- Can be recalculated manually from **Admin → Metrics → Recalculate usage**
+- Upserts on `(company_id, period_start, period_end)` via the Supabase secret key
+
+Metrics include minutes used, answered/missed call counts, and average duration for the billing period.
+
+## Audit logging
+
+Administrative mutations write to `audit_logs` via `writeAuditLog()` (secret-key insert):
+
+- Client create/update/deactivate
+- User invite, password reset link generation, activate/deactivate
+- Admin onboarding updates
+
+Admins can review recent entries at **Admin → Audit Log**.
+
+## Client onboarding
+
+Clients view read-only onboarding progress at `/onboarding` (status, checklist, current step, notes). Admins manage records at `/admin/onboarding` with inline edits and audit trail entries.
 
 ## Performance patterns
 

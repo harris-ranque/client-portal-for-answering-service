@@ -10,9 +10,40 @@ import {
   isPublicRoute,
 } from "@/features/auth/lib/routes";
 import { mapAuthUserToSessionUser } from "@/features/auth/lib/session";
-import { APP_ROUTES, DEFAULT_AUTH_REDIRECT, USER_ROLES } from "@/lib/constants";
+import { APP_ROUTES, USER_ROLES } from "@/lib/constants";
+import { getHomeRouteForRole } from "@/lib/constants/navigation";
 import { getSupabasePublicConfigOrNull } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
+
+function copySupabaseCookies(from: NextResponse, to: NextResponse) {
+  for (const cookie of from.cookies.getAll()) {
+    to.cookies.set(cookie);
+  }
+}
+
+function redirectWithSupabaseCookies(
+  request: NextRequest,
+  supabaseResponse: NextResponse,
+  pathname: string,
+  options?: { clearSearch?: boolean; searchParams?: Record<string, string> },
+) {
+  const redirectUrl = request.nextUrl.clone();
+  redirectUrl.pathname = pathname;
+
+  if (options?.clearSearch) {
+    redirectUrl.search = "";
+  }
+
+  if (options?.searchParams) {
+    for (const [key, value] of Object.entries(options.searchParams)) {
+      redirectUrl.searchParams.set(key, value);
+    }
+  }
+
+  const redirectResponse = NextResponse.redirect(redirectUrl);
+  copySupabaseCookies(supabaseResponse, redirectResponse);
+  return redirectResponse;
+}
 
 export async function updateSession(request: NextRequest) {
   const config = getSupabasePublicConfigOrNull();
@@ -24,7 +55,7 @@ export async function updateSession(request: NextRequest) {
 
   let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient<Database>(config.url, config.anonKey, {
+  const supabase = createServerClient<Database>(config.url, config.publishableKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -52,30 +83,32 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (!user && (isProtectedRoute(pathname) || isAdminRoute(pathname))) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = APP_ROUTES.login;
-    redirectUrl.searchParams.set("redirectTo", pathname);
-    return NextResponse.redirect(redirectUrl);
+    return redirectWithSupabaseCookies(request, supabaseResponse, APP_ROUTES.login, {
+      searchParams: { redirectTo: pathname },
+    });
   }
 
   if (user && isAuthOnlyRoute(pathname)) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = getSafeRedirectPath(
-      request.nextUrl.searchParams.get("redirectTo"),
-      DEFAULT_AUTH_REDIRECT,
+    const sessionUser = mapAuthUserToSessionUser(user);
+
+    return redirectWithSupabaseCookies(
+      request,
+      supabaseResponse,
+      getSafeRedirectPath(
+        request.nextUrl.searchParams.get("redirectTo"),
+        getHomeRouteForRole(sessionUser.role),
+      ),
+      { clearSearch: true },
     );
-    redirectUrl.search = "";
-    return NextResponse.redirect(redirectUrl);
   }
 
   if (user && isAdminRoute(pathname)) {
     const sessionUser = mapAuthUserToSessionUser(user);
 
     if (sessionUser.role !== USER_ROLES.admin) {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = APP_ROUTES.dashboard;
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
+      return redirectWithSupabaseCookies(request, supabaseResponse, APP_ROUTES.dashboard, {
+        clearSearch: true,
+      });
     }
   }
 

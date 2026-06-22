@@ -1,3 +1,4 @@
+import { AdminRecalculateUsageButton } from "@/features/admin/components/admin-recalculate-usage-button";
 import { formatMinutes } from "@/features/usage/lib/formatters";
 import type { AdminUsageCompanyRow } from "@/features/admin/types/admin.types";
 import { PageContainer, PageHeader } from "@/components/layout";
@@ -31,6 +32,7 @@ export function AdminMetricsView({ rows }: AdminMetricsViewProps) {
       <PageHeader
         title="Metrics"
         description="Platform-wide usage for the current billing period."
+        actions={<AdminRecalculateUsageButton />}
       />
 
       <div className="grid gap-4 sm:grid-cols-3">

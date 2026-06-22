@@ -13,6 +13,7 @@ import {
   setAdminUserActive,
 } from "@/features/admin/lib/users.repository";
 import { inviteUserSchema, userIdSchema } from "@/features/admin/schemas/user.schema";
+import { writeAuditLog } from "@/lib/audit/audit-log.service";
 import { APP_ROUTES } from "@/lib/constants";
 
 export async function inviteUserAction(
@@ -36,7 +37,15 @@ export async function inviteUserAction(
   }
 
   try {
-    await inviteAdminUser(parsed.data);
+    const invited = await inviteAdminUser(parsed.data);
+    await writeAuditLog({
+      actorId: access.user.id,
+      companyId: parsed.data.companyId ?? null,
+      action: "user.invite",
+      entityType: "user",
+      entityId: invited.userId ?? null,
+      metadata: { email: parsed.data.email, role: parsed.data.role },
+    });
     revalidatePath(APP_ROUTES.admin.users);
     return { success: true };
   } catch (error) {
@@ -64,6 +73,12 @@ export async function resetUserPasswordAction(
 
   try {
     const resetLink = await generateAdminPasswordResetLink(email);
+    await writeAuditLog({
+      actorId: access.user.id,
+      action: "user.password_reset",
+      entityType: "user",
+      metadata: { email },
+    });
     return { success: true, resetLink };
   } catch (error) {
     return {
@@ -92,6 +107,12 @@ export async function toggleUserActiveAction(
 
   try {
     await setAdminUserActive(parsed.data.userId, isActive);
+    await writeAuditLog({
+      actorId: access.user.id,
+      action: isActive ? "user.activate" : "user.deactivate",
+      entityType: "user",
+      entityId: parsed.data.userId,
+    });
     revalidatePath(APP_ROUTES.admin.users);
     return { success: true };
   } catch (error) {

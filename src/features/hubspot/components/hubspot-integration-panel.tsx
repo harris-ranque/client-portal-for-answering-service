@@ -137,7 +137,7 @@ export function HubSpotIntegrationPanel({
 
         {!adminReady ? (
           <p className="text-sm text-muted-foreground">
-            Set `SUPABASE_SERVICE_ROLE_KEY` to write sync jobs and update records.
+Set `SUPABASE_SECRET_KEY` to write sync jobs and update records.
           </p>
         ) : null}
 

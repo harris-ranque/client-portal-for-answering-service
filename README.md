@@ -50,9 +50,11 @@ Update `.env.local` with the local API URL and keys from `supabase status`:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<anon-key-from-supabase-status>
-SUPABASE_SERVICE_ROLE_KEY=<service-role-key-from-supabase-status>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-key-from-supabase-status>
+SUPABASE_SECRET_KEY=<secret-key-from-supabase-status>
 ```
+
+Use the `PUBLISHABLE_KEY` and `SECRET_KEY` values from `supabase status` (or `npm run supabase:status`). Legacy JWT `ANON_KEY` / `SERVICE_ROLE_KEY` env names are still accepted as fallbacks.
 
 4. **Option B — Supabase Cloud**
 
@@ -60,8 +62,8 @@ Create a project at [supabase.com](https://supabase.com), then set:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://<project-ref>.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=<your-anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<your-service-role-key>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<your-publishable-key>
+SUPABASE_SECRET_KEY=<your-secret-key>
 ```
 
 5. Start the development server:
@@ -83,8 +85,8 @@ Copy `.env.example` to `.env.local` for local development. See [Deployment (Verc
 | `NEXT_PUBLIC_APP_URL` | Client | Yes | Canonical app URL |
 | `NEXT_PUBLIC_APP_NAME` | Client | Yes | Display name in UI and metadata |
 | `NEXT_PUBLIC_SUPABASE_URL` | Client | Yes* | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client | Yes* | Supabase anonymous key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Server | Yes* | Admin invites, integration sync writes |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Client | Yes* | Supabase publishable key (`sb_publishable_...`) |
+| `SUPABASE_SECRET_KEY` | Server | Yes* | Admin invites, integration sync writes (`sb_secret_...`) |
 | `STRIPE_SECRET_KEY` | Server | Billing | Stripe API secret |
 | `STRIPE_WEBHOOK_SECRET` | Server | Billing | Stripe webhook signing secret |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client | Billing | Stripe publishable key |
@@ -321,7 +323,7 @@ The admin area (`/admin`) is restricted to users with the `admin` role.
 
 API: `GET /api/admin/metrics`
 
-User invites and password resets require `SUPABASE_SERVICE_ROLE_KEY`.
+User invites and password resets require `SUPABASE_SECRET_KEY`.
 
 ## JustCall Integration
 
@@ -340,7 +342,7 @@ Reusable service layer in `src/lib/justcall/` and sync workflows in `src/feature
   - `POST /api/admin/integrations/justcall/sync`
   - `POST /api/admin/integrations/justcall/retry`
 
-Requires `JUSTCALL_API_KEY`, `JUSTCALL_API_SECRET`, and `SUPABASE_SERVICE_ROLE_KEY`.
+Requires `JUSTCALL_API_KEY`, `JUSTCALL_API_SECRET`, and `SUPABASE_SECRET_KEY`.
 
 ## HubSpot Integration
 
@@ -358,7 +360,7 @@ Reusable service layer in `src/lib/hubspot/` and sync workflows in `src/features
   - `POST /api/admin/integrations/hubspot/sync`
   - `POST /api/admin/integrations/hubspot/retry`
 
-Requires `HUBSPOT_ACCESS_TOKEN` and `SUPABASE_SERVICE_ROLE_KEY`.
+Requires `HUBSPOT_ACCESS_TOKEN` and `SUPABASE_SECRET_KEY`.
 
 ## Stripe Integration
 
@@ -377,7 +379,7 @@ Webhook processing and manual sync workflows in `src/features/stripe/`.
   - `POST /api/admin/integrations/stripe/sync`
   - `POST /api/admin/integrations/stripe/retry`
 
-Requires `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`.
+Requires `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, and `SUPABASE_SECRET_KEY`.
 
 For local webhook testing:
 
@@ -441,7 +443,7 @@ npm run supabase:push
    - **Site URL:** `https://<your-vercel-domain>`
    - **Redirect URLs:** `https://<your-vercel-domain>/auth/callback`
 
-4. Copy the project **URL**, **anon key**, and **service role key** for Vercel environment variables.
+4. Copy the project **URL**, **publishable key**, and **secret key** for Vercel environment variables.
 
 ### 2. Deploy to Vercel
 
@@ -455,8 +457,8 @@ npm run supabase:push
 | `NEXT_PUBLIC_APP_URL` | Yes | Canonical app URL, e.g. `https://portal.example.com` |
 | `NEXT_PUBLIC_APP_NAME` | Yes | Display name |
 | `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anon key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-only; required for admin invites and sync jobs |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Yes | Supabase publishable key |
+| `SUPABASE_SECRET_KEY` | Yes | Server-only; required for admin invites and sync jobs |
 | `STRIPE_SECRET_KEY` | If using billing | Stripe secret key |
 | `STRIPE_WEBHOOK_SECRET` | If using billing | From Stripe webhook endpoint |
 | `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | If using billing | Stripe publishable key |
@@ -520,6 +522,17 @@ https://<your-vercel-domain>/api/health
 17. ~~Performance optimization~~
 18. ~~Deployment~~
 19. ~~Documentation~~
+
+## Post-launch hardening
+
+After the core milestones, the following spec gaps were closed:
+
+- **Usage aggregation** — `usage_metrics` is populated from `call_logs` after JustCall sync and via admin recalculate
+- **Client onboarding page** — `/onboarding` shows status, checklist, and notes
+- **Audit logging** — admin actions write to `audit_logs`; review at `/admin/audit`
+- **Admin onboarding edits** — inline updates with audit trail
+- **Origin validation** — CSRF hardening on mutating API routes
+- **Error/loading UX** — route error boundaries, loading fallbacks, and `ErrorState` on key pages
 
 ## License
 

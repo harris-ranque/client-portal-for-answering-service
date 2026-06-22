@@ -81,7 +81,7 @@ export function AdminIntegrationsView({
           <CardDescription>Database, authentication, and row-level security.</CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Project URL and anon key are required for all authenticated features.
+          Project URL and publishable key are required for all authenticated features.
         </CardContent>
       </Card>
     </PageContainer>

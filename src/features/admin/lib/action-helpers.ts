@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 export type AdminActionState = {
   success?: boolean;
   error?: string;
+  message?: string;
   fieldErrors?: Record<string, string[] | undefined>;
   resetLink?: string;
 };

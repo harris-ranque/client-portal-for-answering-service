@@ -10,7 +10,7 @@ import {
   toCallLogsSearchRecord,
 } from "@/features/calls/lib/parse-query";
 import { PageContainer, PageHeader } from "@/components/layout";
-import { LoadingSkeleton } from "@/components/feedback";
+import { ErrorState, LoadingSkeleton } from "@/components/feedback";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { APP_ROUTES } from "@/lib/constants";
@@ -65,10 +65,23 @@ async function CallsContent({ searchParams }: CallsPageProps) {
     );
   }
 
-  const result = await getCallLogs({
-    ...query,
-    companyId,
-  });
+  let result;
+
+  try {
+    result = await getCallLogs({
+      ...query,
+      companyId,
+    });
+  } catch (error) {
+    return (
+      <PageContainer>
+        <PageHeader title="Call logs" description="Search, filter, and export your call history." />
+        <ErrorState
+          message={error instanceof Error ? error.message : "Unable to load call logs."}
+        />
+      </PageContainer>
+    );
+  }
 
   return (
     <CallLogsView

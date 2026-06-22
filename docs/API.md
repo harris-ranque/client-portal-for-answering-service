@@ -2,6 +2,8 @@
 
 All authenticated endpoints require a valid Supabase session cookie. Admin endpoints require the `admin` role.
 
+Mutating Route Handlers (`POST` on billing portal and admin integration sync/retry) also require a matching `Origin` or `Referer` header from the app URL allowlist. Requests from unknown origins return `403` with code `INVALID_ORIGIN`.
+
 ## Response format
 
 **Success:**
@@ -107,7 +109,7 @@ Client endpoints return `403` when the user has no `company_id` assigned.
 | `POST` | `/api/admin/integrations/stripe/sync` | `{ "syncType": "subscriptions" \| "invoices" \| "all", "companyId"?: uuid }` | Manual backfill |
 | `POST` | `/api/admin/integrations/stripe/retry` | `{ "syncId": uuid }` | Retry failed manual sync |
 
-Admin integration sync endpoints require `SUPABASE_SERVICE_ROLE_KEY` and the relevant third-party credentials.
+Admin integration sync endpoints require `SUPABASE_SECRET_KEY` and the relevant third-party credentials.
 
 ---
 

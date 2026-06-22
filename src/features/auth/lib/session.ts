@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getAuthUser } from "@/lib/supabase/auth";
 import {
   getSessionProfile,
@@ -32,7 +34,7 @@ export function mapAuthUserToSessionUser(
   };
 }
 
-export async function getSessionUser(): Promise<SessionUser | null> {
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const authUser = await getAuthUser();
 
   if (!authUser?.email) {
@@ -50,9 +52,9 @@ export async function getSessionUser(): Promise<SessionUser | null> {
     email: authUser.email,
     app_metadata: authUser.app_metadata as Record<string, unknown>,
   });
-}
+});
 
-export async function getSessionUserWithCompany() {
+export const getSessionUserWithCompany = cache(async () => {
   const authUser = await getAuthUser();
 
   if (!authUser?.email) {
@@ -78,4 +80,4 @@ export async function getSessionUserWithCompany() {
     company: sessionProfile.company,
     profile: sessionProfile.user,
   };
-}
+});

@@ -27,6 +27,9 @@ EXECUTE FUNCTION public.set_updated_at();
 
 ALTER TABLE public.stripe_sync ENABLE ROW LEVEL SECURITY;
 
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.stripe_sync TO authenticated;
+GRANT SELECT ON public.stripe_sync TO anon;
+
 CREATE POLICY stripe_sync_admin ON public.stripe_sync
 FOR ALL
 USING (public.is_admin())

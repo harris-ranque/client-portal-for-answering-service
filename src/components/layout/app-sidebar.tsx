@@ -4,8 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  ADMIN_NAV_ITEMS,
-  CLIENT_NAV_ITEMS,
+  getNavItemsForRole,
   isNavItemActive,
   type NavItem,
 } from "@/lib/constants/navigation";
@@ -23,7 +22,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import type { UserRole } from "@/types";
 
@@ -72,6 +70,7 @@ function NavGroup({
 export function AppSidebar({ userRole, companyName }: AppSidebarProps) {
   const pathname = usePathname();
   const isAdmin = userRole === "admin";
+  const navItems = getNavItemsForRole(userRole);
 
   return (
     <Sidebar collapsible="icon" variant="inset">
@@ -82,13 +81,7 @@ export function AppSidebar({ userRole, companyName }: AppSidebarProps) {
               size="lg"
               className="data-[slot=sidebar-menu-button]:p-1.5!"
               render={
-                <Link
-                  href={
-                    isAdmin && pathname.startsWith("/admin")
-                      ? APP_ROUTES.admin.root
-                      : APP_ROUTES.dashboard
-                  }
-                />
+                <Link href={isAdmin ? APP_ROUTES.admin.root : APP_ROUTES.dashboard} />
               }
             >
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -106,20 +99,21 @@ export function AppSidebar({ userRole, companyName }: AppSidebarProps) {
       </SidebarHeader>
 
       <SidebarContent>
-        <NavGroup label="Portal" items={CLIENT_NAV_ITEMS} pathname={pathname} />
-
-        {isAdmin ? (
-          <>
-            <SidebarSeparator className="mx-0" />
-            <NavGroup label="Administration" items={ADMIN_NAV_ITEMS} pathname={pathname} />
-          </>
-        ) : null}
+        <NavGroup
+          label={isAdmin ? "Administration" : "Portal"}
+          items={navItems}
+          pathname={pathname}
+        />
       </SidebarContent>
 
       <SidebarFooter>
         <div className="px-2 py-1">
           <p className="truncate text-xs text-muted-foreground">
-            {companyName ? `Organization: ${companyName}` : "No company assigned"}
+            {isAdmin
+              ? "Administrator"
+              : companyName
+                ? `Organization: ${companyName}`
+                : "No company assigned"}
           </p>
         </div>
       </SidebarFooter>

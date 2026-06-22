@@ -7,8 +7,15 @@ import { isJustCallConfigured } from "@/lib/justcall";
 import { isSupabaseAdminConfigured } from "@/lib/supabase/config";
 import { USER_ROLES } from "@/lib/constants";
 import { createErrorResponse, createSuccessResponse } from "@/lib/api";
+import { rejectInvalidOrigin } from "@/lib/security/reject-invalid-origin";
 
 export async function POST(request: Request) {
+  const originError = rejectInvalidOrigin(request);
+
+  if (originError) {
+    return originError;
+  }
+
   const authResult = await requireApiAuth({ role: USER_ROLES.admin });
 
   if ("response" in authResult) {
@@ -19,7 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       createErrorResponse(
         "JUSTCALL_NOT_CONFIGURED",
-        "JustCall sync requires valid JustCall and Supabase service role credentials.",
+        "JustCall sync requires valid JustCall and Supabase secret key credentials.",
       ),
       { status: 503 },
     );

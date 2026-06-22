@@ -6,7 +6,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { ADMIN_NAV_ITEMS, CLIENT_NAV_ITEMS, isNavItemActive } from "@/lib/constants/navigation";
+import { getNavItemsForRole, isNavItemActive } from "@/lib/constants/navigation";
 import { APP_ROUTES } from "@/lib/constants";
 import type { UserRole } from "@/types";
 
@@ -17,8 +17,8 @@ interface PortalHeaderProps {
 }
 
 function getPageTitle(pathname: string, role: UserRole) {
-  const allItems = role === "admin" ? [...CLIENT_NAV_ITEMS, ...ADMIN_NAV_ITEMS] : CLIENT_NAV_ITEMS;
-  const match = allItems
+  const items = getNavItemsForRole(role);
+  const match = items
     .filter((item) => isNavItemActive(pathname, item.href))
     .sort((a, b) => b.href.length - a.href.length)[0];
 

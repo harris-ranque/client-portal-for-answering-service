@@ -81,7 +81,7 @@ export async function inviteAdminUser(input: {
   companyId?: string;
 }) {
   if (!isSupabaseAdminConfigured()) {
-    throw new Error("Supabase service role key is required to invite users.");
+    throw new Error("Supabase secret key is required to invite users.");
   }
 
   const admin = createAdminClient();
@@ -140,7 +140,7 @@ export async function inviteAdminUser(input: {
 
 export async function generateAdminPasswordResetLink(email: string) {
   if (!isSupabaseAdminConfigured()) {
-    throw new Error("Supabase service role key is required to reset passwords.");
+    throw new Error("Supabase secret key is required to reset passwords.");
   }
 
   const admin = createAdminClient();

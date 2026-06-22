@@ -4,9 +4,9 @@ import { getSupabaseAdminConfig } from "@/lib/supabase/config";
 import type { Database } from "@/types/database";
 
 export function createAdminClient() {
-  const { url, serviceRoleKey } = getSupabaseAdminConfig();
+  const { url, secretKey } = getSupabaseAdminConfig();
 
-  return createClient<Database>(url, serviceRoleKey, {
+  return createClient<Database>(url, secretKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
